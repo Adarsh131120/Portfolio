@@ -103,6 +103,8 @@ import { Container, Row, Col } from "react-bootstrap";
 import contactImg from "../assets/contact-img.svg";
 import 'animate.css';
 import TrackVisibility from 'react-on-screen';
+import emailjs from "@emailjs/browser";
+
 
 export const Contact = () => {
   const formInitialDetails = {
@@ -125,23 +127,49 @@ export const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(process.env.REACT_APP_SERVICE_ID,
+      process.env.REACT_APP_TEMPLATE_ID,
+      formDetails,
+      {
+        publicKey: process.env.REACT_APP_PUBLIC_ID,
+      })
     setButtonText("Sending...");
     try {
-      let response = await fetch("http://localhost:5000/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8",
-        },
-        body: JSON.stringify(formDetails),
-      });
-      setButtonText("Send");
-      let result = await response.json();
-      setFormDetails(formInitialDetails);
-      if (result.code === 200) {
-        setStatus({ success: true, message: 'Message sent successfully' });
-      } else {
-        setStatus({ success: false, message: 'Something went wrong, please try again later.' });
-      }
+      // let response = await fetch("http://localhost:5000/contact", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json;charset=utf-8",
+      //   },
+      //   body: JSON.stringify(formDetails),
+      // });
+      // let result = await response.json();
+      // setFormDetails(formInitialDetails);
+      // if (result.code === 200) {
+        //   setStatus({ success: true, message: 'Message sent successfully' });
+        // } else {
+          //   setStatus({ success: false, message: 'Something went wrong, please try again later.' });
+          // }
+          // e.preventDefault();
+          
+          emailjs
+          .send(
+            process.env.REACT_APP_SERVICE_ID,
+            process.env.REACT_APP_TEMPLATE_ID,
+            formDetails,
+            {
+              publicKey: process.env.REACT_APP_PUBLIC_ID,
+            }
+          )
+          .then(
+            () => {
+              console.log('SUCCESS!');
+            },
+            (error) => {
+              console.log('FAILED...', error.text);
+            },
+          )
+          .finally(() => setButtonText("Send"));
+          
     } catch (error) {
       setStatus({ success: false, message: 'Something went wrong, please try again later.' });
     }
